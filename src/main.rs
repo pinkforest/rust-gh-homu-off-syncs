@@ -51,12 +51,16 @@ fn main() {
         .flatten()
     {
 
+        //println!("PR: {:?}", pr);
+        
         let mut commits = vec![];
+
+        println!("---- PR({}): {}", pr.merged, pr.title);
         
         for commit in pr.commits.nodes.iter().flatten() {
             if let Some(commit) = commit {
                 commits.push(commit.commit.abbreviated_oid.clone());
-
+                println!(" {} - commit", commit.commit.abbreviated_oid);
             }
         }
         if let Some(nodes) = &pr.comments.nodes {
@@ -66,7 +70,9 @@ fn main() {
                         Some(author) => author.login.to_owned(),
                         None => "".to_owned(),
                     };
-                    println!("{} - {}", author, comment.body);
+                    if author == "bors" {
+                        println!("{} - {}", author, comment.body);
+                    }
                 }
             }
         }

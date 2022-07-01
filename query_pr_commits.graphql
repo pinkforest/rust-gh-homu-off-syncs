@@ -1,9 +1,10 @@
 query RepoView($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
-    pullRequests(last: 2) {
+    pullRequests(last: 3, states: MERGED) {
       nodes {
         title
         updatedAt
+        merged
         comments(first: 50) {
           totalCount
           nodes {
