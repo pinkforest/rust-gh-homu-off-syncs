@@ -1,0 +1,38 @@
+query RepoView($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    pullRequests(last: 2) {
+      nodes {
+        title
+        updatedAt
+        comments(first: 50) {
+          totalCount
+          nodes {
+            author {
+              __typename
+              login
+            }
+            body
+          }
+        }
+        commits(first: 50) {
+          totalCount
+          nodes {
+            commit {
+              abbreviatedOid
+              author {
+                name
+                email
+                date
+              }
+              comments(first: 50) {
+                nodes {
+                  body
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
