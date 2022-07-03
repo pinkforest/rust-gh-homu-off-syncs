@@ -1,0 +1,22 @@
+query MoreCommits($pr_id: String!, $commit_cursor: String!) {
+  pullRequest(id: $pr_id) {
+    node {
+      number
+      commits(first: 100, after: $commit_cursor, orderBy: { direction: DESC, field: CREATED_AT }) {
+        totalCount
+        nodes {
+          commit {
+            abbreviatedOid
+            oid
+            committedDate
+            author {
+              name
+              email
+              date
+            }            
+          }
+        }
+      }
+    }
+  }
+}

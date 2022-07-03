@@ -1,33 +1,50 @@
-query RepoView($owner: String!, $name: String!) {
+query RepoView($owner: String!, $name: String!, $pr_cursor: String) {
   repository(owner: $owner, name: $name) {
-    pullRequests(last: 3, states: MERGED) {
-      nodes {
-        title
-        updatedAt
-        merged
-        comments(first: 50) {
-          totalCount
-          nodes {
-            author {
-              __typename
-              login
-            }
-            body
+    pullRequests(first: 50, after: $pr_cursor, states: MERGED, orderBy: { direction: DESC, field: CREATED_AT } ) {
+      edges {
+        cursor
+        node {
+          id
+          number
+          baseRefName        
+          headRefName
+          mergedAt
+          mergeCommit {
+            abbreviatedOid
+            oid
           }
-        }
-        commits(first: 50) {
-          totalCount
-          nodes {
-            commit {
-              abbreviatedOid
+          author {
+            __typename
+            login
+          }
+          title
+          updatedAt
+          merged
+          comments(first: 100) {
+            totalCount
+            nodes {
               author {
-                name
-                email
-                date
+                __typename
+                login
               }
-              comments(first: 50) {
-                nodes {
-                  body
+              body
+            }
+          }
+          commits(first: 100) {
+            totalCount
+            edges {
+              cursor
+              node {
+                commit {
+                  id
+                  abbreviatedOid
+                  oid
+                  committedDate
+                  author {
+                    name
+                    email
+                    date
+                  }
                 }
               }
             }
