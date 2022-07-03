@@ -17,6 +17,7 @@ type GitObjectId = String;
 )]
 struct RepoView;
 
+/*
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "schema.docs.graphql",
@@ -24,19 +25,22 @@ struct RepoView;
     response_derives = "Debug",
     normalization = "rust"
 )]
-struct MoreCommits;
+struct MoreCommits; */
 
-use lazy_static::lazy_static;
+use once_cell::sync::OnceCell;
 use regex::Regex;
+
+static RE_BORS_APPROVED: OnceCell<Regex> = OnceCell::new();
 
 fn main() {
     
     let github_api_token =
         std::env::var("SECRET_POA_GITHUB").expect("Missing SECRET_POA_GITHUB env var");
 
-    lazy_static! {
-        static ref RE_BORS_APPROVED: Regex = Regex::new(r"^\s*:pushpin: Commit ([A-F0-9a-f]+) has been approved").unwrap();
-    }
+    let re = RE_BORS_APPROVED.
+        get_or_init(||
+                    Regex::new(r"^\s*:pushpin: Commit ([A-F0-9a-f]+) has been approved").unwrap()
+        );
     
     let client = Client::builder()
         .user_agent("graphql-rust/0.10.0")
@@ -93,16 +97,18 @@ fn main() {
             let mut last_commit   = "".to_owned();
             let mut last_approved = "".to_owned();
             
-            for commit in pr.commits.nodes.iter().flatten() {
-                if let Some(commit) = commit {
-                    last_commit = commit.commit.oid.clone();
+            for commit_edge in pr.commits.edges.iter().flatten() {
+                if let Some(commit_edge) = commit_edge {
+                    if let Some(commit) = &commit_edge.node {
+                        last_commit = commit.commit.oid.clone();
+                    }
                 }
             }
 
-            let more_commit_variables = more_commits::Variables {
-                pr_id: pr_node.id.clone(),
-                commit_cursor: ..,
-            };
+            //let more_commit_variables = more_commits::Variables {
+            //    pr_id: pr_node.id.clone(),
+            //    commit_cursor: ..,
+            //};
             
             if let Some(nodes) = &pr.comments.nodes {
                 for comment in nodes {
@@ -112,7 +118,7 @@ fn main() {
                             None => "".to_owned(),
                         };
                         if author == "bors" {
-                            if let Some(approved_commit_ref) = RE_BORS_APPROVED.captures_iter(&comment.body).next() {
+                            if let Some(approved_commit_ref) = re.captures_iter(&comment.body).next() {
                                 last_approved = approved_commit_ref[1].to_string();
                             }
                         }

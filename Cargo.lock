@@ -202,7 +202,7 @@ name = "gh-scraper"
 version = "0.1.0"
 dependencies = [
  "graphql_client",
- "lazy_static",
+ "once_cell",
  "regex",
  "reqwest",
  "serde",

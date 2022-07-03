@@ -35,8 +35,8 @@ query RepoView($owner: String!, $name: String!, $pr_cursor: String) {
             edges {
               cursor
               node {
+                id
                 commit {
-                  id
                   abbreviatedOid
                   oid
                   committedDate
